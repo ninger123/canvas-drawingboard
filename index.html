@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        #canvas{
+            background: green;
+            display: block;
+        }
+        body{
+            margin: 0;
+        }
+        .actions{
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+        .actions > #brush{
+            display: none;
+        }
+
+        .actions.x > #brush{
+            display: inline-block;
+        }
+        .actions.x > #eraser{
+            display: none
+        }
+
+
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id=actions class="actions">
+    <button id='eraser'>橡皮擦</button>
+    <button id='brush'>画笔</button>
+</div>
+<script>
+    var canvas=document.getElementById('canvas');
+    var eraser=document.getElementById('eraser');
+    var brush=document.getElementById('brush');
+    var context=canvas.getContext('2d');
+
+    getSize();
+    listenToMouse(canvas);
+
+    var eraserEnabled=false;
+    eraser.onclick= function () {
+        eraserEnabled=true;
+        actions.className='actions x';
+    }
+    brush.onclick=function(){
+        eraserEnabled=false;
+        actions.className='actions';
+    }
+
+    function listenToMouse(canvas){
+        var using=false;
+        var lastPoint={x:undefined,y:undefined};
+        canvas.onmousedown= function (e) {
+            using=true;
+            var x= e.clientX;
+            var y= e.clientY;
+            if(eraserEnabled){
+                context.clearRect(x-5,y-5,10,10)
+            }
+            else{
+                lastPoint={"x":x,"y":y};
+            }
+        }
+        canvas.onmousemove=function(e){
+            var x= e.clientX;
+            var y= e.clientY;
+            if(using){
+                if(eraserEnabled){
+                    context.clearRect(x-5,y-5,10,10)
+                }
+                else{
+                    var newPoint={"x":x,"y":y}
+                }
+
+                drawLine(lastPoint.x,lastPoint.y,newPoint.x,newPoint.y);
+                lastPoint = newPoint;  //实时更新最后一个点
+            }
+        }
+        canvas.onmouseup=function(){
+            using=false;
+        }
+    }
+
+    function getSize(){
+        var pageWidth=document.documentElement.clientWidth;
+        var pageHeight=document.documentElement.clientHeight;
+
+        canvas.width=pageWidth;
+        canvas.height=pageHeight;
+    }
+
+    window.onresize=function(){
+        getSize();
+    }
+
+    function drawLine(x1,y1,x2,y2){
+        context.beginPath();
+        context.strokeStyle='black';
+        context.moveTo(x1,y1);   //起点
+        context.lineWidth=5;
+        context.lineTo(x2,y2);   //终点
+        context.stroke();
+        context.closePath();
+    }
+
+
+</script>
+</body>
+</html>
